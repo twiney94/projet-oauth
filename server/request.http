@@ -1,0 +1,53 @@
+POST http://localhost:8080/register
+Content-Type: application/x-www-form-urlencoded
+
+name=MonApp&url=http://localhost:8081&redirect_success=http://localhost:8081/oauth_success
+
+###
+GET http://localhost:8080/auth?response_type=code&client_id=67dc2be521bec2ff862d3ab057de216b&redirect_uri=http://localhost:8081/oauth_success&scope=read&state=xyz
+
+###
+GET http://localhost:8080/auth-success?scope=read&client_id=67dc2be521bec2ff862d3ab057de216b&state=xyz
+
+###
+GET http://localhost:8080/token?grant_type=authorization_code&code=5d842005b4eb4e85c003a7c00c5a7697&redirect_uri=http://localhost:8081/oauth_success&client_id=67dc2be521bec2ff862d3ab057de216b&client_secret=04054cf433eeb3976252c81b6d657fda
+
+###
+GET http://localhost:8080/token?grant_type=password&username=johndoe4&password=password&redirect_uri=http://localhost:8081/oauth_success&client_id=67dc2be521bec2ff862d3ab057de216b&client_secret=04054cf433eeb3976252c81b6d657fda
+###
+GET http://localhost:8080/token?grant_type=client_credentials&redirect_uri=http://localhost:8081/oauth_success&client_id=67dc2be521bec2ff862d3ab057de216b&client_secret=04054cf433eeb3976252c81b6d657fda
+
+###
+GET http://localhost:8080/me
+Authorization: Bearer 1389a3cbbb5d618841e270821a5f65b1
+###
+GET http://localhost:8080/stats
+Authorization: Bearer f6e663e3c3363e4baa4444a822ea0f5d
+
+POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+Content-Type: application/x-www-form-urlencoded
+
+curl -v -X POST "https://api-m.sandbox.paypal.com/v1/oauth2/token" \
+    -u "AQ0T3Km0fZKmH3t4o8lIFrSkAf8J2Ep_hmtWtA2p2pCfmx1rmi5nDX041HXOMwr2cFMYesxqDF01I_9b:ECv5eeiWowdUE3xlmWBIVgx9sRXsWLz6u8YTdni6M1tN39q-tZLG8m_gJv1ltaPBBfdJ0Eg2U2Bogml1" \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    -d "grant_type=client_credentials"  
+
+    client := &http.Client{}
+    req, _ := http.NewRequest("GET", "https://api.sandbox.paypal.com/v1/reporting/transactions?start_date=2022-05-30T00:00:00-0700&end_date=2022-06-02T12:59:59-0700", nil)
+
+    req.Header.Add("Authorization", "Bearer "+accessToken)
+    resp, _ := client.Do(req)
+    decoder := json.NewDecoder(resp.Body)
+    var data Transactions
+    err := decoder.Decode(&data)
+    if err != nil {
+        log.Fatalln(err)
+    }
+
+    return data
+}
+
+GET https://api.sandbox.paypal.com/v1/reporting/transactions?start_date=2022-05-30T00:00:00-0700&end_date=2022-06-02T12:59:59-0700
+Authorization: Bearer A21AAJ2pbzuk_X2iLmAKUQjwmlAqX8RrK3rF7U277Jml1l8gW3k-nYUiBIDbPq4vmFGRcBgzkHDLNHF3YVmSrdvE8iExmj0SA
+
+curl https://api.sandbox.paypal.com/v1/oauth2/token?grant_type=authorization_code&code= -H "Accept: application/json" -H "Authorization: Bearer C21AALAq2fmh3rwzJ-uu3nJxU98BPRt19KIGYejW-yQMdkcNz-RGNsJzvoN0VCCv-eT4bbudOqnQXsbktrCeWsg_z3IUmzhSA"
