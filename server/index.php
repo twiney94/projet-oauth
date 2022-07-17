@@ -72,6 +72,10 @@ function insertToken($token)
 {
     insertRow('./data/tokens.db', $token);
 }
+function insertUser($user)
+{
+    insertRow('./data/users.db', $user);
+}
 
 function register()
 {
@@ -121,8 +125,6 @@ function authPaypal()
 
     curl_setopt($ch, CURLOPT_URL, "https://api.sandbox.paypal.com/v1/oauth2/token");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-    curl_setopt($ch, CURLOPT_POSTFIELDS, "grant_type=authorization_code&code;=$code");
     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
         'grant_type' => 'authorization_code',
         'code' => "$code"
@@ -141,7 +143,7 @@ function authPaypal()
         echo 'Error:' . curl_error($ch);
     }
 
-    curl_setopt($ch, CURLOPT_URL, "https://api.sandbox.paypal.com/v1/identity/oauth2/userinfo?schema=paypalv1.1");
+    curl_setopt($ch, CURLOPT_URL, "https://api.sandbox.paypal.com/v1/identity/oauth2/userinfo");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
 
@@ -151,12 +153,32 @@ function authPaypal()
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
     $result = curl_exec($ch);
-    print_r($result);
+    // print_r($result);
     if (curl_errno($ch)) {
         echo 'Error:' . curl_error($ch);
     }
     curl_close($ch);
-    exit;
+
+    $creds = json_decode($result);
+    if (curl_errno($ch)) {
+        echo 'Error:' . curl_error($ch);
+    }
+
+    $name = explode(" ", $creds->name);
+    $first_name = $name[0];
+    $last_name = $name[1];
+
+    $user = [
+        'id' => rand(0,38904217944),
+        'firstname' => $first_name,
+        'lastname' => $last_name,
+        'username' => $creds->email,
+        'password' => bin2hex(random_bytes(16)),
+    ];
+
+    insertUser($user);
+    http_response_code(201);
+    echo json_encode($user);
 }
 
 function authSuccess()
@@ -292,7 +314,7 @@ switch (strtok($route, "?")) {
     case '/auth':
         auth();
         break;
-    case '/transactions':
+    case '/auth-paypal':
         authPaypal();
         break;
     case '/auth-success':
